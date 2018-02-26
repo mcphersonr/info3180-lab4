@@ -1,4 +1,9 @@
-from flask import Flask
+from flask import Flask,request, redirect, url_for
+from werkzeug.utils import secure_filename
+
+
+UPLOAD_FOLDER  = './app/static/uploads'
+ALLOWED_EXTENSIONS = set(['jpg','png'])
 
 # Config Values
 USERNAME = 'admin'
@@ -9,4 +14,5 @@ SECRET_KEY = 'Sup3r$3cretkey'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config['UPLOAD_FOLDER']= UPLOAD_FOLDER
 from app import views

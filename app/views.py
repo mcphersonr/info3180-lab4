@@ -5,7 +5,8 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 import os
-from app import app
+from app import app, ALLOWED_EXTENSIONS
+from forms import UploadForm
 from flask import render_template, request, redirect, url_for, flash, session, abort
 from werkzeug.utils import secure_filename
 
@@ -14,11 +15,11 @@ from werkzeug.utils import secure_filename
 # Routing for your application.
 ###
 
+
 @app.route('/')
 def home():
     """Render website's home page."""
     return render_template('home.html')
-
 
 @app.route('/about/')
 def about():
@@ -26,21 +27,24 @@ def about():
     return render_template('about.html', name="Mary Jane")
 
 
-@app.route('/upload', methods=['POST', 'GET'])
+@app.route('/upload/', methods=['GET','POST'])
 def upload():
     if not session.get('logged_in'):
         abort(401)
-
-    # Instantiate your form class
-
-    # Validate file upload on submit
-    if request.method == 'POST':
-        # Get file data and save to your uploads folder
-
+    form=UploadForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        print form.csrf_token
+        image = form.image.data
+        details=form.details.data
+        filename=secure_filename(image.filename)
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
         flash('File Saved', 'success')
-        return redirect(url_for('home'))
-
-    return render_template('upload.html')
+        return redirect(url_for('home',filename=filename,details=details))
+        
+    else: 
+        print form.errors.items()
+        flash('File not saved','error')
+    return render_template('upload.html',form=form)
 
 
 @app.route('/login', methods=['POST', 'GET'])
