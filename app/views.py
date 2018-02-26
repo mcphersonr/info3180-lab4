@@ -24,7 +24,7 @@ def home():
 @app.route('/about/')
 def about():
     """Render the website's about page."""
-    return render_template('about.html', name="Mary Jane")
+    return render_template('about.html', name="Ramone McPherson")
 
 
 @app.route('/upload/', methods=['GET','POST'])
@@ -47,6 +47,8 @@ def upload():
     return render_template('upload.html',form=form)
 
 
+
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     error = None
@@ -66,6 +68,24 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out', 'success')
     return redirect(url_for('home'))
+    
+
+def get_uploaded_images():
+    rootdir = os.getcwd()
+    print rootdir
+    fileslist =[]
+    for subdir, dirs, files in os.walk(rootdir + '/app/static/uploads'):
+        for file in files:
+            fileslist.append(os.path.join(subdir, file).split('/')[-1])
+    return fileslist
+    
+
+@app.route('/files')
+def files():
+    if not session.get('logged_in'):
+        abort(401)
+    files=get_uploaded_images()
+    return render_template('files.html', files = files)
 
 
 ###
